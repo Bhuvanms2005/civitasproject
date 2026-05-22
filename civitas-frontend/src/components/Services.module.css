@@ -1,0 +1,87 @@
+.container {
+  max-width: 800px;
+  width: 92%;
+  margin: 30px auto;
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.container h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.container h2 {
+  color: #2c3e50;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 1.4rem;
+}
+
+.container h3 {
+  color: #1e272e;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-size: 1.15rem;
+}
+
+.container p {
+  margin-bottom: 14px;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.container ul {
+  margin-left: 20px;
+  margin-bottom: 12px;
+}
+
+.container ul li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+.finalNote {
+  font-weight: bold;
+  color: #333;
+  margin-top: 20px;
+}
+
+.homeLink {
+  display: inline-block;
+  margin-top: 30px;
+  text-decoration: none;
+  color: #00796b;
+  font-weight: bold;
+  font-size: 16px;
+  border: 1px solid #00796b;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+}
+
+.homeLink:hover {
+  background-color: #723ba3;
+  color: white;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+    margin: 15px auto;
+  }
+  .container h1 {
+    font-size: 1.6rem;
+  }
+  .container p, .container ul li {
+    font-size: 14px;
+  }
+}

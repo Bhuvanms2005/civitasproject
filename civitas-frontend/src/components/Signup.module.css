@@ -1,0 +1,187 @@
+.formBox {
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 650px;
+  width: 92%;
+  margin: 40px auto;
+  box-sizing: border-box;
+}
+
+.signupContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.heading {
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.label {
+  color: #333;
+  font-size: 18px;
+  font-family: 'Lucida Sans', Geneva, Verdana, sans-serif;
+}
+
+/* FIX: responsive input widths */
+.input {
+  width: 100%;
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  font-size: 16px;
+  margin-top: 8px;
+  box-sizing: border-box;
+}
+
+.formGroup {
+  text-align: center;
+  margin-top: 14px;
+}
+
+.checkboxGroup {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 18px;
+  text-align: left;
+  gap: 10px;
+}
+
+.checkboxGroup input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.checkboxGroup label {
+  font-size: 16px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.checkboxGroup label a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.button {
+  background-color: #9a63c9;
+  width: 100%;
+  max-width: 260px;
+  font-size: 18px;
+  margin-top: 20px;
+  line-height: 38px;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  padding: 0 15px;
+}
+
+.button:hover { background-color: #723ba3; }
+
+.error {
+  margin: 10px auto;
+  font-weight: 500;
+}
+
+.googleButton {
+  background-color: #9a63c9;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 260px;
+  margin-top: 15px;
+}
+
+.googleButton:hover { background-color: #723ba3; }
+
+.googleIcon {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.orDivider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.orDivider::before, .orDivider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ccc;
+}
+
+.orDivider:not(:empty)::before { margin-right: .25em; }
+.orDivider:not(:empty)::after { margin-left: .25em; }
+
+.homeLinkWrapper {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.homeLink {
+  display: inline-block;
+  margin-top: 10px;
+  text-decoration: none;
+  color: #00796b;
+  font-weight: bold;
+  font-size: 16px;
+  border: 1px solid #00796b;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+}
+
+.homeLink:hover {
+  background-color: #723ba3;
+  color: white;
+}
+
+/* FIX: onerow should be a row on desktop, column on mobile */
+.onerow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.onerow .formGroup {
+  flex: 1;
+  min-width: 200px;
+  text-align: left;
+}
+
+@media (max-width: 500px) {
+  .formBox {
+    padding: 25px 18px;
+    margin: 20px auto;
+  }
+  .onerow {
+    flex-direction: column;
+    gap: 0;
+  }
+  .onerow .formGroup {
+    min-width: 100%;
+    text-align: center;
+  }
+  .button, .googleButton {
+    max-width: 100%;
+  }
+}
