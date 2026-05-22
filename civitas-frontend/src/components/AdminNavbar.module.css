@@ -1,11 +1,16 @@
+/* ═══════════════════════════════════════════════════════
+   ADMINNAVBAR.MODULE.CSS  —  Civitas Design System
+   ═══════════════════════════════════════════════════════ */
+
 .navbar {
-  background-color: #424242;
+  background: linear-gradient(135deg, #1a0a2e 0%, #2d1048 100%);
   color: white;
-  padding: 15px 30px;
+  padding: 0 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  height: 64px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.25);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -21,114 +26,240 @@
 
 .adminLogo {
   color: white;
-  font-family: 'Roboto', sans-serif;
-  font-size: 28px;
-  font-weight: bold;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
   text-decoration: none;
-  transition: color 0.3s;
+  letter-spacing: 3px;
+  transition: color 0.2s ease;
 }
 
-.adminLogo:hover {
-  color: #cccccc;
+.adminLogo span {
+  color: #C39BD3;
+}
+
+.adminLogo:hover { color: #C39BD3; }
+
+.adminBadge {
+  background: rgba(108,52,131,0.5);
+  border: 1px solid rgba(195,155,211,0.3);
+  color: #C39BD3;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 100px;
+  backdrop-filter: blur(4px);
 }
 
 .hamburgerMenu {
-  font-size: 2em;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   cursor: pointer;
-  color: white;
+  padding: 8px;
+  transition: background 0.2s ease;
+}
+
+.hamburgerMenu:hover {
+  background: rgba(255,255,255,0.14);
+}
+
+.bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
 .navbarRight {
   display: flex;
   align-items: center;
   position: relative;
+  gap: 16px;
 }
+
+.navNotif {
+  position: relative;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.navNotif:hover { background: rgba(255,255,255,0.14); }
 
 .profileSection {
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 12px;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.2s ease;
 }
 
 .profileSection:hover {
-  background-color: #616161;
+  background: rgba(255,255,255,0.12);
 }
 
 .profileIcon {
-  background-color: #e0e0e0;
-  color: #424242;
+  background: linear-gradient(135deg, #6C3483, #8e44ad);
+  color: #fff;
   border-radius: 50%;
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-weight: bold;
-  font-size: 1.1em;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
 }
 
+.profileName {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profileChevron {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  transition: transform 0.2s ease;
+}
+
+.profileChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ── DROPDOWN ─────────────────────────────────────── */
 .adminDropdownMenu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   right: 0;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 210px;
-  padding: 15px;
+  background: #fff;
+  border: 1px solid rgba(108,52,131,0.12);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(108,52,131,0.2);
+  min-width: 240px;
+  padding: 20px;
   z-index: 1001;
   display: flex;
   flex-direction: column;
-  text-align: left;
+  animation: dropDown 0.2s ease-out;
 }
 
-.adminDropdownMenu p {
-  margin: 5px 0;
-  color: #333;
-  font-size: 0.95em;
+@keyframes dropDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.adminDropdownMenu strong {
-  font-size: 1.1em;
-  color: #222;
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(108,52,131,0.1);
 }
 
-.dropdownButton {
-  background-color: #d32f2f;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 15px;
-  font-size: 0.9em;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: background-color 0.3s ease;
+.dropdownAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6C3483, #8e44ad);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dropdownInfo strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dropdownInfo span {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: rgba(108,52,131,0.08);
+  margin: 8px 0;
+}
+
+.dropdownBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
-  text-align: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+  font-family: 'Poppins', sans-serif;
 }
 
-.dropdownButton:hover {
-  background-color: #b71c1c;
+.dropdownBtn:hover {
+  background: rgba(108,52,131,0.08);
+  color: #6C3483;
 }
 
+.dropdownBtnDanger {
+  color: #dc2626;
+  margin-top: 4px;
+  border-top: 1px solid rgba(220,38,38,0.1);
+  padding-top: 14px;
+}
+
+.dropdownBtnDanger:hover {
+  background: rgba(220,38,38,0.06);
+  color: #dc2626;
+}
+
+/* ── RESPONSIVE ───────────────────────────────────── */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 12px 15px;
-  }
-  .adminLogo {
-    font-size: 20px;
-  }
-  .hamburgerMenu {
-    font-size: 1.8em;
-  }
-  .profileIcon {
-    width: 36px;
-    height: 36px;
-    font-size: 1em;
-  }
+  .navbar { padding: 0 16px; }
+  .adminLogo { font-size: 18px; letter-spacing: 2px; }
+  .adminBadge { display: none; }
+  .profileName { display: none; }
+  .profileSection { padding: 6px; }
 }

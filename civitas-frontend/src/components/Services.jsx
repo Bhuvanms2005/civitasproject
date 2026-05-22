@@ -1,123 +1,198 @@
-/*import React from 'react';
-import styles from './Services.module.css'; 
-
-function Services() {
-  return (
-    <div className={styles.container}>
-      <h1>Our Services</h1>
-      <p>
-        At <strong>Civitas</strong>, we are dedicated to building cleaner, safer, and smarter cities by leveraging technology and community involvement.
-        Our platform provides a set of vital services that empower citizens to raise complaints and share real-time issues related to urban infrastructure.
-      </p>
-
-      <h2>Garbage Disposal Complaints</h2>
-      <p>
-        Unattended garbage can be an eyesore and a health hazard. You can report any such issue in your neighborhood by simply uploading a photo and the exact location.
-        We notify the relevant municipal authorities for swift cleanup, ensuring a cleaner environment.
-      </p>
-
-      <h2>Drainage Overflow Complaints</h2>
-      <p>
-        Overflowing or blocked drains are breeding grounds for disease and discomfort.
-        Our platform allows you to report drainage problems with photos and location, helping local authorities respond quickly to prevent further inconvenience.
-      </p>
-
-      <h2>Damaged Roads Reporting</h2>
-      <p>
-        Roads full of potholes or cracks are risky for daily commuters.
-        Through Civitas, you can report damaged roads by submitting a photo and location.
-        We work with civic departments to ensure such areas are repaired quickly for safer travel.
-      </p>
-
-      <h2>Street Light Complaints</h2>
-      <p>
-        Dark streets can lead to accidents and crime.
-        If you spot a broken or non-functional street light, just report it with its location and a photo.
-        We’ll alert the local authorities to restore lighting and improve safety in your area.
-      </p>
-      <p className={styles.finalNote}>
-        Every complaint you raise contributes to a better tomorrow.
-        Let’s join hands in transforming our city with Civitas — your smart city companion.
-      </p>
-
-      <a href="/home" className={styles.homeLink}>← Back to Home</a>
-    </div>
-  );
-}
-
-export default Services;*/
-
 import React from 'react';
-import styles from './Services.module.css'; 
+import { Link } from 'react-router-dom';
+import styles from './Services.module.css';
+
+const categories = [
+  {
+    emoji: '🗑️',
+    title: 'Sanitation & Waste',
+    subtitle: '2 complaint types',
+    items: [
+      { bold: 'Garbage Overflow', desc: 'Report unattended garbage piles for quick municipal cleanup.' },
+      { bold: 'Missed Waste Pickup', desc: 'Notify if waste collection was skipped in your area.' },
+    ],
+  },
+  {
+    emoji: '🌊',
+    title: 'Drainage & Water',
+    subtitle: '2 complaint types',
+    items: [
+      { bold: 'Drainage Overflow', desc: 'Report overflowing or blocked drains to prevent health hazards.' },
+      { bold: 'Waterlogging / Flooded Street', desc: 'Alert authorities about water accumulation or flooding.' },
+    ],
+  },
+  {
+    emoji: '🛣️',
+    title: 'Road & Infrastructure',
+    subtitle: '3 complaint types',
+    items: [
+      { bold: 'Pothole / Road Damage', desc: 'Flag dangerous potholes and cracked road surfaces for repair.' },
+      { bold: 'Road Obstruction', desc: 'Report debris, fallen trees, or materials blocking the road.' },
+      { bold: 'Footpath / Sidewalk Damage', desc: 'Report broken or unsafe pedestrian walkways.' },
+    ],
+  },
+  {
+    emoji: '💡',
+    title: 'Street Lighting',
+    subtitle: '2 complaint types',
+    items: [
+      { bold: 'Street Light Not Working', desc: 'Report non-functional lights that increase road risk.' },
+      { bold: 'Damaged Light Pole', desc: 'Alert authorities about broken or hazardous light poles.' },
+    ],
+  },
+  {
+    emoji: '🐾',
+    title: 'Animal & Public Safety',
+    subtitle: '3 complaint types',
+    items: [
+      { bold: 'Stray Animal Menace', desc: 'Report aggressive or injured stray animals in your locality.' },
+      { bold: 'Illegal Dumping', desc: 'Flag unauthorized dumping of waste in public spaces.' },
+      { bold: 'Public Safety Hazard', desc: 'Report anything posing an immediate danger to residents.' },
+    ],
+  },
+  {
+    emoji: '🌳',
+    title: 'Parks & Green Spaces',
+    subtitle: '2 complaint types',
+    items: [
+      { bold: 'Fallen Tree / Branch', desc: 'Report dangerous fallen trees or branches blocking paths.' },
+      { bold: 'Park Maintenance Issue', desc: 'Flag neglected parks, broken benches, or overgrown areas.' },
+    ],
+  },
+];
 
 function Services() {
   return (
-    <div className={styles.container}>
-      <h1>Our Services</h1>
-      <p>
-        At <strong>Civitas</strong>, we are dedicated to building cleaner, safer, and smarter cities by leveraging 
-        technology and community involvement. Our platform empowers citizens to report real-time urban issues 
-        and helps civic authorities respond quickly.
-      </p>
+    <div className={styles.servicesPage}>
 
-      <h2>Report a New Complaint</h2>
-      <p>
-        Choose from a wide range of categories to keep your city safe, clean, and efficient:
-      </p>
+      {/* ── HERO ──────────────────────────────── */}
+      <section className={styles.hero}>
+        <span className={styles.heroBadge}>What We Offer</span>
+        <h1 className={styles.heroTitle}>
+          Our <span className={styles.heroAccent}>Services</span> &amp;<br />
+          Complaint Categories
+        </h1>
+        <p className={styles.heroSub}>
+          From potholes to stray animals — Civitas covers every urban issue you face.
+          Report, track, and see real change in your neighbourhood.
+        </p>
+      </section>
 
-      {/* 1. Sanitation & Waste */}
-      <h3>1. Sanitation & Waste</h3>
-      <ul>
-        <li><strong>Garbage Overflow</strong> – Report unattended garbage piles for quick cleanup.</li>
-        <li><strong>Missed Waste Pickup</strong> – Notify if the waste collection was skipped in your area.</li>
-      </ul>
+      {/* ── STATS BAR ─────────────────────────── */}
+      <div className={styles.statsBar}>
+        <div className={styles.statCell}>
+          <span className={styles.statNum}>14+</span>
+          <span className={styles.statDesc}>Issue Categories</span>
+        </div>
+        <div className={styles.statCell}>
+          <span className={styles.statNum}>48h</span>
+          <span className={styles.statDesc}>Avg Resolution</span>
+        </div>
+        <div className={styles.statCell}>
+          <span className={styles.statNum}>100%</span>
+          <span className={styles.statDesc}>Free to Use</span>
+        </div>
+        <div className={styles.statCell}>
+          <span className={styles.statNum}>GPS</span>
+          <span className={styles.statDesc}>Auto-Location</span>
+        </div>
+      </div>
 
-      {/* 2. Drainage & Water */}
-      
-      <h3>2. Drainage & Water</h3>
-      <ul>
-        <li><strong>Drainage Overflow</strong> – Report overflowing or blocked drains to avoid health hazards.</li>
-        <li><strong>Waterlogging / Flooded Street</strong> – Alert authorities about water accumulation or flooding.</li>
-      </ul>
+      {/* ── BODY ──────────────────────────────── */}
+      <main className={styles.body}>
 
-      {/* 3. Electrical & Lighting */}
-      <h3>3. Electrical & Lighting</h3>
-      <ul>
-        <li><strong>Streetlight Not Working</strong> – Report dark streets to enhance public safety.</li>
-        <li><strong>Streetlight Always ON</strong> – Save energy by notifying lights that remain on during the day.</li>
-      </ul>
+        {/* Category Cards */}
+        <div className={styles.categoryIntro}>
+          <span className={styles.sectionTag}>Complaint Categories</span>
+          <h2 className={styles.sectionTitle}>Every Issue Has a Category</h2>
+          <p className={styles.sectionSub}>
+            Choose from our structured categories to ensure your report reaches the right authority instantly.
+          </p>
+        </div>
 
-      {/* 4. Road & Infrastructure */}
-      <h3>4. Road & Infrastructure</h3>
-      <ul>
-        <li><strong>Pothole / Damaged Road</strong> – Prevent accidents by reporting damaged roads.</li>
-        <li><strong>Tree Fallen / Road Obstruction</strong> – Ensure roads remain clear and safe for travel.</li>
-      </ul>
+        <div className={styles.categoriesGrid}>
+          {categories.map((cat) => (
+            <div key={cat.title} className={styles.categoryCard}>
+              <div className={styles.categoryHeader}>
+                <span className={styles.categoryEmoji}>{cat.emoji}</span>
+                <div className={styles.categoryHeaderText}>
+                  <h3>{cat.title}</h3>
+                  <p>{cat.subtitle}</p>
+                </div>
+              </div>
+              <div className={styles.categoryBody}>
+                <ul className={styles.servicesList}>
+                  {cat.items.map((item) => (
+                    <li key={item.bold}>
+                      <span><strong>{item.bold}</strong> – {item.desc}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
 
-      {/* 5. Animal Safety / Nuisance */}
-      <h3>5. Animal Safety / Nuisance</h3>
-      <ul>
-        <li><strong>Stray Dog Issue</strong> – Ensure safe handling of stray dogs in your area.</li>
-        <li><strong>Cattle Blocking Road</strong> – Report obstructions caused by animals for traffic safety.</li>
-      </ul>
+        {/* How It Works */}
+        <div className={styles.howItWorks}>
+          <span className={styles.sectionTag}>Process</span>
+          <h2 className={styles.sectionTitle}>How to Raise a Complaint</h2>
+          <p className={styles.sectionSub}>Four simple steps to get your issue resolved.</p>
+          <div className={styles.stepsGrid}>
+            {[
+              { n: '01', title: 'Sign In', desc: 'Log in to your Civitas account or register in under a minute.' },
+              { n: '02', title: 'Select Category', desc: 'Pick the type of issue from our organised category list.' },
+              { n: '03', title: 'Add Details', desc: 'Upload a photo and confirm your location — GPS fills it automatically.' },
+              { n: '04', title: 'Submit & Track', desc: 'Submit and monitor real-time status updates until resolved.' },
+            ].map((s) => (
+              <div key={s.n} className={styles.step}>
+                <div className={styles.stepNumber}>{s.n}</div>
+                <h4>{s.title}</h4>
+                <p>{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      {/* 6. Public Safety */}
-      <h3>6. Public Safety</h3>
-      <ul>
-        <li><strong>Noise Complaint</strong> – Maintain peaceful neighborhoods by reporting excessive noise.</li>
-        <li><strong>Broken Footpath / Open Manhole</strong> – Avoid accidents by alerting unsafe walkways.</li>
-      </ul>
+        {/* Photo Guidelines */}
+        <div className={styles.guidelines}>
+          <h2>📸 Photo Upload Guidelines</h2>
+          <p>Clear photos help us resolve your issue faster. Follow these tips:</p>
+          <ul className={styles.guidelinesList}>
+            {[
+              'Ensure the image is clear and in focus.',
+              'Take a wide shot to give context of the issue.',
+              'Do not upload unrelated or blurry images.',
+              'Limit image size to under 5MB for faster upload.',
+              'Photograph in good lighting, especially for night issues.',
+              'Include the immediate surroundings in the frame.',
+            ].map((tip) => (
+              <li key={tip}>
+                <span className={styles.guideCheck}>✓</span>
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      <p className={styles.finalNote}>
-        Every complaint you raise contributes to a better tomorrow.
-        Let’s join hands in transforming our city with Civitas — your smart city companion.
-      </p>
+        {/* CTA */}
+        <div className={styles.cta}>
+          <h3>Every Complaint You Raise Builds a Better City</h3>
+          <p>Join our community of active citizens and start making your neighbourhood safer today.</p>
+          <Link to="/signup" className={styles.ctaBtn}>Start Reporting</Link>
+          <Link to="/home" className={styles.ctaBtnOutline}>← Back to Home</Link>
+        </div>
 
-      <a href="/home" className={styles.homeLink}>← Back to Home</a>
+        <Link to="/home" className={styles.backLink}>← Return to Home</Link>
+      </main>
+
+      {/* ── FOOTER ──────────────────────────────── */}
+      <footer className={styles.footer}>
+        © {new Date().getFullYear()} Civitas · <Link to="/about">About</Link> · <Link to="/contact">Contact</Link>
+      </footer>
+
     </div>
   );
 }
 
 export default Services;
-
-
