@@ -1,131 +1,65 @@
-/*import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './ProfileDropdown.module.css';
-
-const ProfileDropdown = ({ user, onLogout, onClose }) => {
-  const navigate = useNavigate();
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
-
-  const handleDeleteProfile = async () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('You are not logged in.');
-        onLogout();
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API_BASE_URL}/users/profile`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (res.ok) {
-          alert('Your account has been successfully deleted.');
-          onLogout();
-        } else {
-          const data = await res.json();
-          alert('Failed to delete account: ' + (data.message || 'Server error.'));
-        }
-      } catch (err) {
-        console.error('Error deleting profile:', err);
-        alert('Server error during profile deletion. Please try again.');
-      }
-    }
-    onClose();
-  };
-
-  const handleEditProfile = () => {
-    navigate('/dashboard/edit-profile');
-    onClose();
-  };
-
-  return (
-    <div className={styles.dropdownMenu}>
-      <div className={styles.profileInfo}>
-        <p><strong>{user.firstName} {user.lastName}</strong></p>
-        <p>{user.email}</p>
-        {user.phone && <p>{user.phone}</p>}
-      </div>
-      <button className={styles.dropdownButton} onClick={handleEditProfile}>Edit Profile</button>
-      <button className={styles.dropdownButton} onClick={onLogout}>Logout</button>
-      <button className={`${styles.dropdownButton} ${styles.deleteButton}`} onClick={handleDeleteProfile}>Delete Profile</button>
-    </div>
-  );
-};
-
-export default ProfileDropdown;*/
-
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Keep navigate for logout if needed, otherwise could remove
 import styles from './ProfileDropdown.module.css';
 
-// CORRECTED: ProfileDropdown now accepts all necessary props
-const ProfileDropdown = ({ user, onLogout, onClose, onProfileUpdateSuccess, onNavigateToContent, onProfileDeleteResult }) => {
-  const navigate = useNavigate(); // Keep for logout/delete profile redirection
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const ProfileDropdown = ({ user, onLogout, onClose, onNavigateToContent, onProfileDeleteResult }) => {
+  const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
   const handleDeleteProfile = async () => {
-    // Keep window.confirm for initial "Are you sure?" prompt
-    const confirmDelete = window.confirm('Are you sure you want to delete your account? This action cannot be undone.');
-    if (!confirmDelete) {
-      onClose(); // Close dropdown if user cancels
-      return;
+    if (!window.confirm('Are you sure you want to permanently delete your account? This cannot be undone.')) {
+      onClose(); return;
     }
-
-    onClose(); // Close dropdown immediately after confirmation (before API call)
-
+    onClose();
     const token = localStorage.getItem('token');
-    if (!token) {
-        // Use callback for message display
-        onProfileDeleteResult('error', 'You are not logged in. Please log in.');
-        onLogout(); // Force logout
-        return;
-    }
-
+    if (!token) { onProfileDeleteResult('error', 'Not logged in.'); onLogout(); return; }
     try {
-      const res = await fetch(`${API_BASE_URL}/users/profile`, {
+      const res = await fetch(`${API}/users/profile`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.ok) {
-        // Use callback for success message display
-        onProfileDeleteResult('success', 'Your account has been successfully deleted. Redirecting to home...');
-        onLogout(); // Log out and redirect after deletion
+        onProfileDeleteResult('success', 'Account deleted successfully. Redirecting...');
+        onLogout();
       } else {
         const data = await res.json();
-        // Use callback for error message display
-        onProfileDeleteResult('error', data.message || 'Failed to delete account. Please try again.');
-        console.error('Failed to delete profile:', data.message);
+        onProfileDeleteResult('error', data.message || 'Failed to delete account.');
       }
-    } catch (err) {
-      console.error('Error deleting profile:', err);
-      onProfileDeleteResult('error', 'Network error during profile deletion. Please try again.');
+    } catch {
+      onProfileDeleteResult('error', 'Network error during account deletion.');
     }
   };
 
-  const handleEditProfile = () => {
-    // CORRECTED: Use onNavigateToContent to update activeContent in parent
-    onNavigateToContent('editProfile');
-    onClose(); // Close dropdown
-  };
-
   return (
-    <div className={styles.dropdownMenu}>
-      <div className={styles.profileInfo}>
-        <p><strong>{user.firstName} {user.lastName}</strong></p>
-        <p>{user.email}</p>
-        {user.phone && <p>{user.phone}</p>}
+    <div className={styles.dropdown}>
+      <div className={styles.header}>
+        <div className={styles.avatar}>
+          {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+        </div>
+        <div className={styles.info}>
+          <p className={styles.name}>{user.firstName} {user.lastName}</p>
+          <p className={styles.email}>{user.email}</p>
+          {user.phone && <p className={styles.phone}>{user.phone}</p>}
+          <span className={styles.role}>{user.role}</span>
+        </div>
       </div>
-      <button className={styles.dropdownButton} onClick={handleEditProfile}>Edit Profile</button>
-      <button className={styles.dropdownButton} onClick={onLogout}>Logout</button>
-      <button className={`${styles.dropdownButton} ${styles.deleteButton}`} onClick={handleDeleteProfile}>Delete Profile</button>
+
+      <div className={styles.divider} />
+
+      <button className={styles.item} onClick={() => { onNavigateToContent('editProfile'); onClose(); }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Profile
+      </button>
+
+      <button className={styles.item} onClick={onLogout}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+
+      <div className={styles.divider} />
+
+      <button className={`${styles.item} ${styles.itemDanger}`} onClick={handleDeleteProfile}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Delete Account
+      </button>
     </div>
   );
 };

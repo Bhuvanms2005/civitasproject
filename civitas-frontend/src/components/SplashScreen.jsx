@@ -6,23 +6,29 @@ function SplashScreen() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate('/home');
-    }, 4000);
-
+    const timer = setTimeout(() => navigate('/home'), 3500);
     return () => clearTimeout(timer);
   }, [navigate]);
 
   return (
-    <div className={styles.splashWrapper}>
-      <div className={styles.splashContainer}>
-        <img src={`${process.env.PUBLIC_URL}/images/logo2.PNG`} alt="CIVITAS Logo" className={styles.logo} />
-
+    <div className={styles.wrapper}>
+      <div className={styles.content}>
+        <div className={styles.logoRing}>
+          <img
+            src={`${process.env.PUBLIC_URL}/images/logo2.PNG`}
+            alt="Civitas"
+            className={styles.logo}
+          />
+        </div>
         <h1 className={styles.title}>CIVITAS</h1>
-        <p className={styles.tagline}>Empowering Citizens, Building Communities</p>
+        <p className={styles.tagline}>Empowering Citizens · Building Communities</p>
+        <div className={styles.loader}>
+          <div className={styles.loaderBar}></div>
+        </div>
       </div>
     </div>
   );
 }
 
 export default SplashScreen;
+

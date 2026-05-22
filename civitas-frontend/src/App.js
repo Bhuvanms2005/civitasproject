@@ -1,30 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import './App.css';
 
 import SplashScreen from './components/SplashScreen';
+import Home from './components/Home';
 import About from './components/About';
 import Services from './components/Services';
 import Contact from './components/Contact';
 import Help from './components/Help';
 import Signup from './components/Signup';
 import SignIn from './components/Signin';
-import Home from './components/Home';
 import Terms from './components/Terms';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
 import VolunteerDashboard from './components/VolunteerDashboard';
 import AdminDashboard from './components/AdminDashboard';
 
-// FIX: Use a component-level function + state so auth check is reactive
 function ProtectedAdminRoute() {
   const token = localStorage.getItem('token');
   const user = localStorage.getItem('user');
   if (!token || !user) return <Navigate to="/signin" replace />;
   try {
-    const parsedUser = JSON.parse(user);
-    if (parsedUser.role === 'admin') return <AdminDashboard />;
-    return <Navigate to="/dashboard" replace />;
-  } catch (e) {
+    const parsed = JSON.parse(user);
+    return parsed.role === 'admin' ? <AdminDashboard /> : <Navigate to="/dashboard" replace />;
+  } catch {
     return <Navigate to="/signin" replace />;
   }
 }
