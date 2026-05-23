@@ -1,308 +1,300 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import InteractiveMap from './InteractiveMap';
 import styles from './ComplaintForm.module.css';
-import InteractiveMap from '../components/InteractiveMap';
+
+const SEVERITIES = [
+  { value: 'low', label: 'Low', desc: 'Minor inconvenience', color: '#10B981' },
+  { value: 'moderate', label: 'Moderate', desc: 'Standard issue', color: '#F59E0B' },
+  { value: 'high', label: 'High', desc: 'Major concern', color: '#F97316' },
+  { value: 'urgent', label: 'Urgent', desc: 'Safety hazard', color: '#EF4444' },
+];
 
 const ComplaintForm = ({ user, category, subType }) => {
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [address, setAddress] = useState('');
-  const [location, setLocation] = useState(null);
   const [mapPinLocation, setMapPinLocation] = useState(null);
   const [description, setDescription] = useState('');
   const [severity, setSeverity] = useState('moderate');
+  const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState(null);
   const [similarComplaints, setSimilarComplaints] = useState([]);
-  const [submissionMessage, setSubmissionMessage] = useState(null);
-  const [submissionError, setSubmissionError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState(null);
+  const fileInputRef = useRef(null);
 
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+  const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+  const token = localStorage.getItem('token');
+
+  const showToast = (msg, type) => { setToast({ msg, type }); setTimeout(() => setToast(null), 5000); };
 
   useEffect(() => {
-    setSubmissionMessage(null);
-    setSubmissionError(null);
-    if (category && subType) {
-      setDescription(`Complaint: ${subType} in ${category} category.`);
-    } else if (category) {
-      setDescription(`Complaint in ${category} category.`);
-    } else {
-      setDescription("Please describe the issue.");
-    }
+    if (category && subType) setDescription(`${subType} issue reported in ${category}.`);
+    else if (category) setDescription(`Issue in ${category} category.`);
+    else setDescription('');
   }, [category, subType]);
 
-  const getCurrentLocation = () => {
-    setSubmissionMessage(null);
-    setSubmissionError(null);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const newLocation = { lat: latitude, lon: longitude };
-          setLocation(newLocation);
-          setMapPinLocation(newLocation);
-          setLocationError(null);
-          setAddress(`Auto-filled: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-        },
-        (error) => {
-          setLocationError("Failed to get current location. Please enter manually.");
-          console.error("Geolocation Error:", error);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    } else {
-      setLocationError("Geolocation not supported by this browser.");
-    }
-  };
-const handleMapLocationChange = (latlng) => {
-    // latlng from Leaflet is { lat, lng }
-    const newPinLocation = { lat: latlng.lat, lon: latlng.lng };
-    setMapPinLocation(newPinLocation);
-    
-    // Optionally update the address field as well
-    setAddress(`Pinned Location: ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`);
-  };
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPhoto(file);
-      setPhotoPreview(URL.createObjectURL(file));
-    } else {
-      setPhoto(null);
-      setPhotoPreview(null);
-    }
-  };
-
-  // 🔁 Fetch real similar complaints from backend
+  // Fetch similar complaints when location+description ready
   useEffect(() => {
-    const fetchSimilarComplaints = async () => {
-      setSimilarComplaints([]);
-      if (mapPinLocation && description.length > 10) {
-        try {
-          const token = localStorage.getItem('token');
-          const res = await fetch(
-            `${API_BASE_URL}/complaints/similar?lat=${mapPinLocation.lat}&lon=${mapPinLocation.lon}&description=${encodeURIComponent(description)}&category=${encodeURIComponent(category || '')}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          const data = await res.json();
-          if (res.ok) {
-            setSimilarComplaints(data.similarComplaints || data.similar || []);
-          } else {
-            console.warn('Could not fetch similar complaints:', data.message);
-          }
-        } catch (err) {
-          console.error('Error fetching similar complaints:', err);
-        }
-      }
-      if (!location || !category || !description) {
-    return; // Don't call backend if any field is empty
-}
-    };
-
-    fetchSimilarComplaints();
+    if (!mapPinLocation || description.length < 15 || !category) return;
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API}/complaints/similar?lat=${mapPinLocation.lat}&lon=${mapPinLocation.lon}&description=${encodeURIComponent(description)}&category=${encodeURIComponent(category)}`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        if (res.ok) setSimilarComplaints(data.similarComplaints || data.similar || []);
+      } catch {}
+    }, 800);
+    return () => clearTimeout(t);
   }, [mapPinLocation, description, category]);
 
-  const handleSupportIssue = async (complaintId) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setSubmissionError('You must be logged in to support a complaint.');
-      return;
-    }
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) { setLocationError('Geolocation not supported'); return; }
+    setLocationLoading(true);
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const loc = { lat: coords.latitude, lon: coords.longitude };
+        setMapPinLocation(loc);
+        setAddress(`${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`);
+        setLocationLoading(false);
+      },
+      () => { setLocationError('Could not get location. Please pin manually on map.'); setLocationLoading(false); },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
+  const handleMapPin = (latlng) => {
+    const loc = { lat: latlng.lat, lon: latlng.lng };
+    setMapPinLocation(loc);
+    setAddress(`${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`);
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('File too large. Max 5MB.', 'error'); return; }
+    setPhoto(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const handleSupportComplaint = async (id) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/complaints/${complaintId}/support`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-      });
-
+      const res = await fetch(`${API}/complaints/${id}/support`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
       const data = await res.json();
-
       if (res.ok) {
-        setSubmissionMessage(data.message || 'Complaint supported successfully!');
-        setSimilarComplaints((prev) =>
-          prev.map((comp) =>
-            comp._id === complaintId ? { ...comp, supportedCount: data.supportedCount, userSupported: true } : comp
-          )
-        );
-      } else {
-        setSubmissionError(data.message || 'Failed to support complaint. Please try again.');
-      }
-    } catch (error) {
-      console.error(error);
-      setSubmissionError('Network error supporting complaint. Please try again.');
-    }
+        setSimilarComplaints(prev => prev.map(c => c._id === id ? { ...c, supportedCount: data.supportCount, userSupported: true } : c));
+        showToast('You\'re now supporting this complaint!', 'success');
+      } else showToast(data.message || 'Failed to support.', 'error');
+    } catch { showToast('Network error.', 'error'); }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmissionMessage(null);
-    setSubmissionError(null);
+    if (!photo) { showToast('Please upload a photo of the issue.', 'error'); return; }
+    if (!mapPinLocation) { showToast('Please pin the location on the map.', 'error'); return; }
+    if (!description.trim()) { showToast('Please describe the issue.', 'error'); return; }
 
-    if (!photo || !address || !description || !mapPinLocation) {
-      setSubmissionError('Please fill all required fields and pinpoint location on map.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('category', category || '');
-    formData.append('subType', subType || '');
-    formData.append('description', description);
-    formData.append('address', address);
-    formData.append('latitude', mapPinLocation.lat);
-    formData.append('longitude', mapPinLocation.lon);
-    formData.append('severity', severity);
-    if (photo) formData.append('photo', photo);
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setSubmissionError('You must be logged in to submit a complaint.');
-      return;
-    }
+    setSubmitting(true);
+    const fd = new FormData();
+    fd.append('category', category || '');
+    fd.append('subType', subType || '');
+    fd.append('description', description);
+    fd.append('address', address);
+    fd.append('latitude', mapPinLocation.lat);
+    fd.append('longitude', mapPinLocation.lon);
+    fd.append('severity', severity);
+    fd.append('photo', photo);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/complaints`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
+      const res = await fetch(`${API}/complaints`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
       const data = await res.json();
-
       if (res.ok) {
-        setSubmissionMessage(data.message || 'Complaint submitted successfully!');
-        setPhoto(null);
-        setPhotoPreview(null);
-        setAddress('');
-        setLocation(null);
-        setMapPinLocation(null);
-        setDescription(category && subType ? `Complaint: ${subType} in ${category} category.` : '');
+        showToast('Complaint submitted successfully! We\'ll keep you updated.', 'success');
+        setPhoto(null); setPhotoPreview(null); setAddress('');
+        setMapPinLocation(null); setSimilarComplaints([]);
+        setDescription(category && subType ? `${subType} issue reported in ${category}.` : '');
         setSeverity('moderate');
-        setSimilarComplaints([]);
-      } else {
-        console.error('Server returned error for complaint submission:', data);
-        setSubmissionError(data.message || JSON.stringify(data) || 'Failed to submit complaint. Please try again.');
-      }
-    } catch (error) {
-      console.error(error);
-      setSubmissionError('Network error. Please try again.');
-    }
+      } else showToast(data.message || 'Submission failed. Please try again.', 'error');
+    } catch { showToast('Network error. Please try again.', 'error'); }
+    finally { setSubmitting(false); }
   };
 
+  if (!category) {
+    return (
+      <div className={styles.noCategory}>
+        <div className={styles.noCategoryIcon}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h2>Select a Complaint Category</h2>
+        <p>Use the sidebar menu to choose a complaint type and then fill out this form.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.complaintFormContainer}>
-      <h2 className={styles.heading}>Report a New Complaint</h2>
-      {category && subType && (
-        <p className={styles.selectedCategory}>
-          Category: <strong>{category}</strong> | Issue: <strong>{subType}</strong>
-        </p>
+    <div className={styles.page}>
+      {toast && (
+        <div className={`${styles.toast} ${styles[`toast${toast.type.charAt(0).toUpperCase() + toast.type.slice(1)}`]}`}>
+          {toast.type === 'success'
+            ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>}
+          {toast.msg}
+        </div>
       )}
-      {!category && <p className={styles.warningMessage}>Please select a complaint category from the sidebar first.</p>}
 
-      <form onSubmit={handleSubmit} className={styles.complaintForm}>
-        <div className={styles.formGroup}>
-          <label htmlFor="photoUpload">Upload Photo (Required)</label>
-          <input type="file" id="photoUpload" accept="image/*,video/*" onChange={handlePhotoChange} required />
-          {photoPreview && <img src={photoPreview} alt="Complaint Preview" className={styles.photoPreview} />}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="address">Address (Required)</label>
-          <input
-            type="text"
-            id="address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Enter address manually or use current location"
-            required
-          />
-          <button type="button" onClick={getCurrentLocation} className={styles.locationButton}>
-            Use Current Location 📍
-          </button>
-          {locationError && <p className={styles.errorMessage}>{locationError}</p>}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>Pin Location on Map (Required)</label>
-          
-          {/* The InteractiveMap component is placed here */}
-          <InteractiveMap 
-            onLocationChange={handleMapLocationChange}
-            position={mapPinLocation} // Pass the state to control the map's pin
-          />
-
-          {mapPinLocation ? (
-            <p style={{ marginTop: '8px' }}>
-              Pinned: {mapPinLocation.lat.toFixed(4)}, {mapPinLocation.lon.toFixed(4)}
-            </p>
-          ) : (
-            <p style={{ marginTop: '8px' }}>
-              Click the map or use the location button to set a location.
-            </p>
-          )}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="description">Description (Required)</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe the issue in detail..."
-            required
-          ></textarea>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="severity">Severity/Urgency</label>
-          <select id="severity" value={severity} onChange={(e) => setSeverity(e.target.value)}>
-            <option value="low">Low (Minor Inconvenience)</option>
-            <option value="moderate">Moderate (Standard Problem)</option>
-            <option value="high">High (Major Concern)</option>
-            <option value="urgent">Urgent (Safety Hazard)</option>
-          </select>
-        </div>
-
-        {similarComplaints.length > 0 && (
-          <div className={styles.similarComplaintsAlert}>
-            <h3>⚠️ Similar Complaints Nearby!</h3>
-            <ul className={styles.similarList}>
-              {similarComplaints.map((comp) => (
-                <li key={comp._id}>
-                  <strong>{comp.category}:</strong> {comp.description} (Status: {comp.status}){' '}
-                  <button
-                    type="button"
-                    className={styles.supportButton}
-                    onClick={() => handleSupportIssue(comp._id)}
-                    disabled={comp.userSupported}
-                  >
-                    {comp.userSupported ? 'Supported ✅' : `Support This Issue (${comp.supportedCount})`}
-                  </button>
-                </li>
-              ))}
-            </ul>
+      <div className={styles.header}>
+        <div>
+          <h1 className={styles.title}>Report a Complaint</h1>
+          <div className={styles.breadcrumb}>
+            <span>{category}</span>
+            {subType && <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg><span>{subType}</span></>}
           </div>
-        )}
+        </div>
+      </div>
 
-        {submissionMessage && <p className={styles.successMessage}>{submissionMessage}</p>}
-        {submissionError && <p className={styles.errorMessage}>{submissionError}</p>}
+      {/* Similar complaints alert */}
+      {similarComplaints.length > 0 && (
+        <div className={styles.similarAlert}>
+          <div className={styles.similarAlertHeader}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <strong>Similar complaints already exist nearby</strong>
+          </div>
+          <p className={styles.similarSubtitle}>Instead of filing a new one, consider supporting an existing report:</p>
+          <ul className={styles.similarList}>
+            {similarComplaints.map(c => (
+              <li key={c._id} className={styles.similarItem}>
+                <div className={styles.similarInfo}>
+                  <span className={styles.similarType}>{c.category}</span>
+                  <p className={styles.similarDesc}>{c.description}</p>
+                </div>
+                <button
+                  className={`${styles.supportBtn} ${c.userSupported ? styles.supportBtnDone : ''}`}
+                  onClick={() => handleSupportComplaint(c._id)}
+                  disabled={c.userSupported}
+                >
+                  {c.userSupported ? 'Supported' : `Support (${c.supportedCount || 0})`}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-        <button type="submit" className={styles.submitButton}>
-          Submit Complaint
-        </button>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.formGrid}>
+          {/* Left column */}
+          <div className={styles.col}>
+            {/* Photo upload */}
+            <div className={styles.field}>
+              <label className={styles.label}>
+                Photo Evidence <span className={styles.required}>*</span>
+              </label>
+              {photoPreview ? (
+                <div className={styles.photoPreviewWrap}>
+                  <img src={photoPreview} alt="Preview" className={styles.photoPreview} />
+                  <button type="button" className={styles.photoRemove} onClick={() => { setPhoto(null); setPhotoPreview(null); }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.uploadArea} onClick={() => fileInputRef.current?.click()}>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: 'none' }} />
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <p className={styles.uploadTitle}>Click to upload photo</p>
+                  <p className={styles.uploadSub}>JPG, PNG, WEBP up to 5MB</p>
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="desc">
+                Description <span className={styles.required}>*</span>
+              </label>
+              <textarea
+                id="desc"
+                className={styles.textarea}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Describe the issue clearly — what you see, how long it's been there, any safety concerns..."
+                rows={5}
+                required
+              />
+              <p className={styles.charCount}>{description.length}/500</p>
+            </div>
+
+            {/* Severity */}
+            <div className={styles.field}>
+              <label className={styles.label}>Severity Level <span className={styles.required}>*</span></label>
+              <div className={styles.severityGrid}>
+                {SEVERITIES.map(s => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    className={`${styles.severityBtn} ${severity === s.value ? styles.severityActive : ''}`}
+                    style={{ '--sev-color': s.color }}
+                    onClick={() => setSeverity(s.value)}
+                  >
+                    <span className={styles.severityDot} style={{ background: s.color }} />
+                    <span className={styles.severityLabel}>{s.label}</span>
+                    <span className={styles.severityDesc}>{s.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right column */}
+          <div className={styles.col}>
+            {/* Location */}
+            <div className={styles.field}>
+              <div className={styles.labelRow}>
+                <label className={styles.label}>
+                  Location <span className={styles.required}>*</span>
+                </label>
+                <button type="button" className={styles.gpsBtn} onClick={getCurrentLocation} disabled={locationLoading}>
+                  {locationLoading ? (
+                    <span className={styles.gpsSpinner} />
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                  )}
+                  {locationLoading ? 'Detecting…' : 'Use My Location'}
+                </button>
+              </div>
+
+              <input
+                type="text"
+                className={styles.input}
+                placeholder="Or type an address"
+                value={address}
+                onChange={e => setAddress(e.target.value)}
+              />
+              {locationError && <p className={styles.fieldError}>{locationError}</p>}
+
+              <div className={styles.mapWrap}>
+                <InteractiveMap onLocationChange={handleMapPin} position={mapPinLocation} />
+              </div>
+              {mapPinLocation && (
+                <p className={styles.pinnedNote}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Pinned at {mapPinLocation.lat.toFixed(4)}, {mapPinLocation.lon.toFixed(4)}
+                </p>
+              )}
+              {!mapPinLocation && <p className={styles.mapHint}>Click on the map to pin the exact location of the issue</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className={styles.submitRow}>
+          <button type="submit" className={styles.submitBtn} disabled={submitting}>
+            {submitting ? <><span className={styles.btnSpinner} />Submitting…</> : 'Submit Complaint'}
+          </button>
+        </div>
       </form>
     </div>
   );
 };
 
 export default ComplaintForm;
-
-
-
