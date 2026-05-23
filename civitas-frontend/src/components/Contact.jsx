@@ -59,7 +59,7 @@ function Contact() {
         <div className={styles.infoCell}>
           <span className={styles.infoIcon}>📞</span>
           <span className={styles.infoLabel}>Phone</span>
-          <span className={styles.infoValue}>+91-123-456-7890</span>
+          <span className={styles.infoValue}>+91 98765 43210</span>
         </div>
         <div className={styles.infoCell}>
           <span className={styles.infoIcon}>✉️</span>
@@ -161,7 +161,7 @@ function Contact() {
             <h3>📬 Contact Information</h3>
             <div className={styles.infoRow}>
               <span className={styles.infoRowIcon}>📞</span>
-              <span>+91-123-456-7890</span>
+              <span>+91 98765 43210</span>
             </div>
             <div className={styles.infoRow}>
               <span className={styles.infoRowIcon}>✉️</span>
